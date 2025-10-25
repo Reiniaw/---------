@@ -4,178 +4,272 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Поймай Инсара — мини-игра</title>
-<style>
-  :root{
-    --bg:#8d7228;
-    --card:#ffffff;
-    --accent:#ff6b6b;
-    --accent2:#ffd93d;
-    --muted:#6b6b6b;
-    --shadow: 0 8px 30px rgba(18,18,18,0.08);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
-    background:linear-gradient(180deg,#fff7f0 0%, #fffefc 60%);
-    color:#222;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-  }
-  .wrap{
-    width:100%;
-    max-width:1100px;
-    background:var(--card);
-    border-radius:18px;
-    padding:20px;
-    box-shadow:var(--shadow);
-  }
-  header{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-  .logo{
-    width:64px;height:64px;border-radius:12px;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    display:flex;align-items:center;justify-content:center;
-    color:white;font-weight:700;font-size:20px
-  }
-  h1{margin:0;font-size:20px}
-  p.lead{margin:4px 0 0;color:var(--muted)}
-
-  .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
-  .card{
-    background:linear-gradient(180deg,#ffffff,#fffdf7);
-    padding:12px;border-radius:12px;box-shadow:var(--shadow);
-  }
-  button{
-    padding:10px 14px;border-radius:10px;border:0;
-    background:var(--accent);color:white;font-weight:700;cursor:pointer
-  }
-  button.secondary{background:transparent;color:var(--accent);border:2px solid var(--accent)}
-  .game-area{margin-top:18px;display:flex;gap:18px}
-  .left{
-    flex:1;min-height:420px;
-    background:linear-gradient(180deg,#fffdf8,#fff7ee);
-    border-radius:12px;padding:12px;position:relative;overflow:hidden
-  }
-  .right{width:320px}
-  .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center}
-  .score,.timer{
-    background:rgba(255,255,255,0.7);padding:8px 10px;
-    border-radius:10px;font-weight:800
-  }
-  .timer{font-weight:700}
-
-  .target{
-    position:absolute;cursor:pointer;touch-action:none;border-radius:12px;
-    user-select:none;display:flex;align-items:center;justify-content:center;
-    overflow:hidden;border:4px solid rgba(255,255,255,0.9);
-    box-shadow:0 8px 20px rgba(0,0,0,0.15)
-  }
-  .target img{display:block;width:100%;height:100%;object-fit:cover}
-
-  .right .card{margin-bottom:12px}
-  .uploads{display:flex;gap:8px;flex-wrap:wrap}
-  .thumb{
-    width:72px;height:72px;border-radius:10px;overflow:hidden;
-    border:2px dashed #eee;display:flex;align-items:center;
-    justify-content:center;background:#fff
-  }
-  input[type=file]{display:none}
-
-  .footer{margin-top:14px;font-size:13px;color:var(--muted)}
-  .big-msg{margin-top:10px;padding:12px;border-radius:10px;
-    background:linear-gradient(90deg,#ffefef,#fff9e6);font-weight:700}
-
-  /* ---------- адаптация ---------- */
-  @media(max-width:840px){
-    body{padding:12px}
-    .wrap{padding:16px}
-    .game-area{flex-direction:column}
-    .right{width:100%}
-    .left{min-height:360px}
-  }
-
-  @media(max-width:600px){
-    h1{font-size:18px}
-    .lead{font-size:14px}
-    .controls{
-      flex-direction:column;
-      gap:10px;
+  <style>
+    :root {
+      --bg1: #0d1117;
+      --bg2: #1a1f29;
+      --card: #1f2733;
+      --accent: #6a5acd;
+      --accent2: #00b3ff;
+      --text: #f5f5f5;
+      --muted: #a0a0a0;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      --radius: 14px;
     }
-    .card{
-      padding:10px;
-    }
-    button,select{
-      font-size:16px;
-      padding:12px;
-      width:100%;
-    }
-    .logo{
-      width:52px;height:52px;font-size:18px;
-    }
-    .right .card strong{font-size:16px}
-    .uploads{justify-content:center}
-    .thumb{width:64px;height:64px}
-    .score,.timer{
-      font-size:16px;
-      padding:6px 8px;
-    }
-    .footer{
-      font-size:12px;
-      text-align:center;
-      margin-top:20px;
-    }
-    .big-msg{
-      font-size:14px;
-      text-align:center;
-    }
-  }
 
-  @media(max-width:400px){
-    body{padding:8px}
-    .wrap{padding:12px}
-    .left{min-height:300px}
-    .thumb{width:60px;height:60px}
-    button,select{font-size:15px}
-  }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: 'Inter', system-ui, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(circle at top, var(--bg1) 0%, var(--bg2) 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
 
-  @media(max-width:600px){
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .controls .card {
-    width: 100%;
-  }
-  #startBtn, #resetBtn {
-    width: 100%;
-  }
-}
+    .wrap {
+      width: 100%;
+      max-width: 1080px;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-</style>
+    header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
 
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(0, 179, 255, 0.4);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    p.lead {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    button, select {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button {
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      color: white;
+      box-shadow: 0 0 12px rgba(106, 90, 205, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 179, 255, 0.6);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+      box-shadow: none;
+    }
+
+    .game-area {
+      display: flex;
+      gap: 20px;
+      flex-wrap: nowrap;
+    }
+
+    .left {
+      flex: 1;
+      min-height: 420px;
+      background: linear-gradient(180deg, #1e2533, #161b26);
+      border-radius: var(--radius);
+      padding: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .right {
+      width: 320px;
+    }
+
+    .hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .score, .timer {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+      color: #fff;
+    }
+
+    .target {
+      position: absolute;
+      cursor: pointer;
+      border-radius: 50%;
+      user-select: none;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 179, 255, 0.4);
+      transition: transform 0.3s ease;
+    }
+
+    .target img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .uploads {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .thumb {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .footer {
+      margin-top: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .big-msg {
+      margin-top: 10px;
+      padding: 14px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, rgba(0,179,255,0.08), rgba(106,90,205,0.08));
+      font-weight: 600;
+      text-align: center;
+      color: #d1d1ff;
+    }
+
+    /* ----- адаптация ----- */
+    @media (max-width: 840px) {
+      .game-area {
+        flex-direction: column;
+      }
+      .right {
+        width: 100%;
+      }
+      .left {
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      h1 { font-size: 18px; }
+      p.lead { font-size: 14px; }
+      .controls {
+        flex-direction: column;
+        gap: 10px;
+      }
+      button, select {
+        width: 100%;
+        font-size: 16px;
+      }
+      .thumb {
+        width: 60px;
+        height: 60px;
+      }
+      .score, .timer {
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .left { min-height: 300px; }
+      button, select { font-size: 15px; padding: 12px; }
+      .logo { width: 52px; height: 52px; font-size: 18px; }
+    }
+  </style>
 </head>
+
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">🎈</div>
+      <div class="logo">🎮</div>
       <div>
         <h1>Поймай Инсара</h1>
-        <p class="lead">Весёлая мини-игра-открытка для друга — поймай как можно больше кликов на фото Инсара!</p>
+        <p class="lead">Мини-игра: лови Инсара и набери максимум очков!</p>
       </div>
     </header>
 
+    <!-- Controls -->
     <div class="controls">
-      <label class="card" style="display:flex;align-items:center;gap:8px;">
-        <input id="fileInput" type="file" accept="image/*" multiple>
-        <button type="button" id="uploadBtn" class="secondary">Загрузить фото Инсара</button>
-        <small style="color:var(--muted);font-weight:600">(можно 1–6 фото)</small>
+      <label class="card" style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;">
+        <input id="fileInput" type="file" accept="image/*" multiple hidden>
+        <button id="uploadBtn" class="secondary">📷 Загрузить фото</button>
+        <small style="color:var(--muted)">до 6 файлов</small>
       </label>
 
-      <div class="card" style="display:flex;gap:8px;align-items:center">
-        <label>Время раунда:
+      <div class="card" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label>⏱ Время:
           <select id="duration">
             <option value="20">20 сек</option>
             <option value="30" selected>30 сек</option>
@@ -183,7 +277,7 @@
             <option value="60">60 сек</option>
           </select>
         </label>
-        <label>Размер цели:
+        <label>🎯 Размер:
           <select id="size">
             <option value="90">Большой</option>
             <option value="70" selected>Средний</option>
@@ -192,12 +286,13 @@
         </label>
       </div>
 
-      <div class="card" style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <button id="startBtn">Старт</button>
-        <button id="resetBtn" class="secondary">Сброс</button>
+      <div class="card" style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+        <button id="startBtn">▶ Старт</button>
+        <button id="resetBtn" class="secondary">⟳ Сброс</button>
       </div>
     </div>
 
+    <!-- Game area -->
     <div class="game-area">
       <div class="left card" id="playArea">
         <div class="hud">
@@ -205,28 +300,25 @@
           <div class="timer" id="timer">00:30</div>
         </div>
 
-        <!-- место для конфетти (canvas) -->
-        <canvas id="confettiCanvas" style="position:absolute;inset:0;pointer-events:none"></canvas>
-
-        <div class="big-msg" id="message">Нажми «Старт», загрузите фото Инсара — и ловите его кликами! Имя: <span style="color:var(--accent);">Инсар</span></div>
-
+        <canvas id="confettiCanvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+        <div class="big-msg" id="message">
+          Нажми «Старт», выбери фото — и лови Инсара кликами!
+        </div>
       </div>
 
       <div class="right">
         <div class="card">
           <strong>Загруженные фото</strong>
-          <div class="uploads" id="thumbs">
-            <!-- превью изображений -->
-          </div>
-          <small style="display:block;margin-top:8px;color:var(--muted)">Клик по превью — удалить.</small>
+          <div class="uploads" id="thumbs"></div>
+          <small style="color:var(--muted);display:block;margin-top:6px;">Клик — удалить.</small>
         </div>
 
         <div class="card">
           <strong>Правила</strong>
-          <ol style="margin:8px 0 0 18px;color:var(--muted)">
-            <li>Нажимай на движущуюся фотографию Инсара — получаешь очки.</li>
-            <li>Цель будет ускользать от курсора — сложнее, но веселее.</li>
-            <li>За каждый удачный клик — +1 очко. Чем меньше размер — тем ценнее (в будущем можно изменить).</li>
+          <ol style="color:var(--muted);margin-top:6px;">
+            <li>Лови фото Инсара — получай очки.</li>
+            <li>Цель двигается и уходит от курсора.</li>
+            <li>Меньше размер — сложнее, но интереснее!</li>
           </ol>
         </div>
 
@@ -234,11 +326,12 @@
           <strong>Лучший результат</strong>
           <div id="best" style="font-size:20px;margin-top:6px;font-weight:800">0 очков</div>
         </div>
-
       </div>
     </div>
 
-    <div class="footer">Поделитесь ссылкой на этот файл — друзья смогут сыграть прямо в браузере. Чтобы заменить фото Инсара — нажмите «Загрузить фото» и выберите свои файлы.</div>
+    <div class="footer">
+      Поделись ссылкой — друзья смогут сыграть прямо в браузере 🎉
+    </div>
   </div>
 
   <script>
