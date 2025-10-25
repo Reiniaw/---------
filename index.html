@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Поймай Инсара — мини-игра</title>
+  <style>
+    :root{
+      --bg:#fffbf0;
+      --card:#ffffff;
+      --accent:#ff6b6b;
+      --accent2:#ffd93d;
+      --muted:#6b6b6b;
+      --shadow: 0 8px 30px rgba(18,18,18,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
+      background:linear-gradient(180deg,#fff7f0 0%, #fffefc 60%); color:#222;
+      display:flex;align-items:center;justify-content:center;padding:24px;
+    }
+    .wrap{width:100%;max-width:1100px;background:var(--card);border-radius:18px;padding:20px;box-shadow:var(--shadow);}
+    header{display:flex;gap:16px;align-items:center}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:4px 0 0;color:var(--muted)}
+
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    .card{background:linear-gradient(180deg,#ffffff,#fffdf7);padding:12px;border-radius:12px;box-shadow:var(--shadow);}
+    button{padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:white;font-weight:700;cursor:pointer}
+    button.secondary{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+    .game-area{margin-top:18px;display:flex;gap:18px}
+    .left{flex:1;min-height:420px;background:linear-gradient(180deg,#fffdf8,#fff7ee);border-radius:12px;padding:12px;position:relative;overflow:hidden}
+    .right{width:320px}
+    .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center}
+    .score{background:rgba(255,255,255,0.7);padding:8px 10px;border-radius:10px;font-weight:800}
+    .timer{background:rgba(255,255,255,0.7);padding:8px 10px;border-radius:10px;font-weight:700}
+
+    .target{position:absolute;cursor:pointer;touch-action:none;border-radius:12px;user-select:none;display:flex;align-items:center;justify-content:center;overflow:hidden;border:4px solid rgba(255,255,255,0.9);box-shadow:0 8px 20px rgba(0,0,0,0.15)}
+    .target img{display:block;width:100%;height:100%;object-fit:cover}
+
+    .right .card{margin-bottom:12px}
+    .uploads{display:flex;gap:8px;flex-wrap:wrap}
+    .thumb{width:72px;height:72px;border-radius:10px;overflow:hidden;border:2px dashed #eee;display:flex;align-items:center;justify-content:center;background:#fff}
+    input[type=file]{display:none}
+
+    .footer{margin-top:14px;font-size:13px;color:var(--muted)}
+
+    .big-msg{margin-top:10px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#ffefef,#fff9e6);font-weight:700}
+
+    @media(max-width:840px){.game-area{flex-direction:column}.right{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🎈</div>
+      <div>
+        <h1>Поймай Инсара</h1>
+        <p class="lead">Весёлая мини-игра-открытка для друга — поймай как можно больше кликов на фото Инсара!</p>
+      </div>
+    </header>
+
+    <div class="controls">
+      <label class="card" style="display:flex;align-items:center;gap:8px;">
+        <input id="fileInput" type="file" accept="image/*" multiple>
+        <button type="button" id="uploadBtn" class="secondary">Загрузить фото Инсара</button>
+        <small style="color:var(--muted);font-weight:600">(можно 1–6 фото)</small>
+      </label>
+
+      <div class="card" style="display:flex;gap:8px;align-items:center">
+        <label>Время раунда:
+          <select id="duration">
+            <option value="20">20 сек</option>
+            <option value="30" selected>30 сек</option>
+            <option value="45">45 сек</option>
+            <option value="60">60 сек</option>
+          </select>
+        </label>
+        <label>Размер цели:
+          <select id="size">
+            <option value="90">Большой</option>
+            <option value="70" selected>Средний</option>
+            <option value="50">Маленький</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card" style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <button id="startBtn">Старт</button>
+        <button id="resetBtn" class="secondary">Сброс</button>
+      </div>
+    </div>
+
+    <div class="game-area">
+      <div class="left card" id="playArea">
+        <div class="hud">
+          <div class="score" id="score">Очки: 0</div>
+          <div class="timer" id="timer">00:30</div>
+        </div>
+
+        <!-- место для конфетти (canvas) -->
+        <canvas id="confettiCanvas" style="position:absolute;inset:0;pointer-events:none"></canvas>
+
+        <div class="big-msg" id="message">Нажми «Старт», загрузите фото Инсара — и ловите его кликами! Имя: <span style="color:var(--accent);">Инсар</span></div>
+
+      </div>
+
+      <div class="right">
+        <div class="card">
+          <strong>Загруженные фото</strong>
+          <div class="uploads" id="thumbs">
+            <!-- превью изображений -->
+          </div>
+          <small style="display:block;margin-top:8px;color:var(--muted)">Клик по превью — удалить.</small>
+        </div>
+
+        <div class="card">
+          <strong>Правила</strong>
+          <ol style="margin:8px 0 0 18px;color:var(--muted)">
+            <li>Нажимай на движущуюся фотографию Инсара — получаешь очки.</li>
+            <li>Цель будет ускользать от курсора — сложнее, но веселее.</li>
+            <li>За каждый удачный клик — +1 очко. Чем меньше размер — тем ценнее (в будущем можно изменить).</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <strong>Лучший результат</strong>
+          <div id="best" style="font-size:20px;margin-top:6px;font-weight:800">0 очков</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">Поделитесь ссылкой на этот файл — друзья смогут сыграть прямо в браузере. Чтобы заменить фото Инсара — нажмите «Загрузить фото» и выберите свои файлы.</div>
+  </div>
+
+  <script>
+    // --- базовая логика ---
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const thumbs = document.getElementById('thumbs');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const playArea = document.getElementById('playArea');
+    const scoreEl = document.getElementById('score');
+    const timerEl = document.getElementById('timer');
+    const message = document.getElementById('message');
+    const bestEl = document.getElementById('best');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+
+    const durationSelect = document.getElementById('duration');
+    const sizeSelect = document.getElementById('size');
+
+    let images = []; // data URLs
+    let target = null;
+    let score = 0;
+    let best = Number(localStorage.getItem('catchInsarBest') || 0);
+    bestEl.textContent = best + ' очков';
+
+    // placeholder SVG person if no image
+    const placeholder = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="100%" height="100%" fill="%23ffd93d"/><g transform="translate(40,20)"> <circle cx="60" cy="40" r="26" fill="%23ff6b6b"/> <rect x="30" y="78" width="60" height="80" rx="18" fill="%23ff6b6b"/></g></svg>')}`;
+
+    // handle upload
+    uploadBtn.addEventListener('click', ()=>fileInput.click());
+    fileInput.addEventListener('change', ev=>{
+      const files = Array.from(ev.target.files).slice(0,6);
+      files.forEach(f=>{
+        const reader = new FileReader();
+        reader.onload = e=>{
+          images.push(e.target.result);
+          renderThumbs();
+        }
+        reader.readAsDataURL(f);
+      });
+      fileInput.value = '';
+    });
+
+    function renderThumbs(){
+      thumbs.innerHTML='';
+      images.forEach((src,i)=>{
+        const d = document.createElement('div'); d.className='thumb';
+        const img = document.createElement('img'); img.src=src; img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover';
+        d.appendChild(img);
+        d.addEventListener('click', ()=>{ images.splice(i,1); renderThumbs(); });
+        thumbs.appendChild(d);
+      });
+      if(images.length===0){
+        const d = document.createElement('div'); d.className='thumb'; d.innerHTML='<small style="text-align:center;color:#999">Пусто</small>';
+        thumbs.appendChild(d);
+      }
+    }
+
+    renderThumbs();
+
+    // create target element
+    function makeTarget(sizePx){
+      removeTarget();
+      const el = document.createElement('div');
+      el.className='target';
+      el.style.width = sizePx+'px'; el.style.height = sizePx+'px';
+      const img = document.createElement('img');
+      img.src = images.length? images[Math.floor(Math.random()*images.length)] : placeholder;
+      el.appendChild(img);
+      playArea.appendChild(el);
+      target = el;
+
+      // click handler
+      el.addEventListener('click', ev=>{
+        ev.stopPropagation();
+        registerHit();
+      });
+
+      return el;
+    }
+
+    function removeTarget(){ if(target){ target.remove(); target=null; } }
+
+    // movement & AI
+    let moving = false;
+    let moveInterval = null;
+    let avoidMouse = true;
+
+    function startMoving(){
+      moving = true;
+      const areaRect = playArea.getBoundingClientRect();
+      if(moveInterval) clearInterval(moveInterval);
+      moveInterval = setInterval(()=>{
+        if(!target) return;
+        // decide new position
+        const sizePx = parseInt(getComputedStyle(target).width);
+        const padding = 8;
+        const maxX = areaRect.width - sizePx - padding;
+        const maxY = areaRect.height - sizePx - padding;
+const offset = 100;
+let nx = offset + Math.random() * (maxX - offset * 2);
+let ny = offset + Math.random() * (maxY - offset * 2) + playArea.scrollTop;
+
+        // if mouse is near, try to move away from it
+        if(lastMouse){
+          const mx = lastMouse.x - areaRect.left;
+          const my = lastMouse.y - areaRect.top;
+          const dx = (nx - mx), dy = (ny - my);
+          const dist = Math.hypot(dx,dy);
+          if(dist < 150){ // too close -> jump opposite
+            nx = Math.min(Math.max(mx + ( (mx-nx) * 2.0 ), padding), maxX);
+            ny = Math.min(Math.max(my + ( (my-ny) * 2.0 ), padding), maxY);
+          }
+        }
+        target.style.transition = 'transform 340ms cubic-bezier(.2,.8,.2,1)';
+        target.style.transform = `translate(${nx}px, ${ny}px)`;
+
+        // occasionally change image
+        if(Math.random()<0.15){
+          const img = target.querySelector('img');
+          img.src = images.length? images[Math.floor(Math.random()*images.length)] : placeholder;
+        }
+      }, 500);
+    }
+
+    function stopMoving(){ moving=false; if(moveInterval) clearInterval(moveInterval); moveInterval=null; }
+
+    // mouse tracking
+    let lastMouse = null;
+    document.addEventListener('mousemove', e=>{ lastMouse = {x:e.clientX,y:e.clientY}; });
+    document.addEventListener('touchmove', e=>{ const t=e.touches[0]; lastMouse={x:t.clientX,y:t.clientY}; }, {passive:true});
+
+    // game state
+    let gameTimer = null;
+    let timeLeft = 30;
+
+    function registerHit(){
+      score += 1;
+      scoreEl.textContent = 'Очки: '+score;
+      spawnConfettiAt(target);
+      // quick image flash/change
+      const img = target.querySelector('img');
+      img.style.transform='scale(0.9)';
+      setTimeout(()=>img.style.transform='',120);
+      // change position immediately
+      // reposition instantly
+      const areaRect = playArea.getBoundingClientRect();
+      const sizePx = parseInt(getComputedStyle(target).width);
+      const padding = 8;
+      const maxX = areaRect.width - sizePx - padding;
+      const maxY = areaRect.height - sizePx - padding;
+const offset = 100;
+const nx = offset + Math.random() * (maxX - offset * 2);
+const ny = offset + Math.random() * (maxY - offset * 2) + playArea.scrollTop;
+
+
+      target.style.transition='transform 160ms ease-out';
+      target.style.transform = `translate(${nx}px, ${ny}px)`;
+    }
+
+    function startGame(){
+      score = 0; scoreEl.textContent='Очки: 0';
+      const dur = parseInt(durationSelect.value);
+      timeLeft = dur; timerEl.textContent = formatTime(timeLeft);
+      // create target
+      const sizePx = parseInt(sizeSelect.value);
+      makeTarget(sizePx);
+      // position target randomly (transform)
+      const areaRect = playArea.getBoundingClientRect();
+const offset = 100; // отступ от краёв
+const nx = offset + Math.random() * (areaRect.width - sizePx - offset * 2 - 8);
+const ny = offset + Math.random() * (areaRect.height - sizePx - offset * 2 - 8) + playArea.scrollTop;
+
+
+      target.style.transform = `translate(${nx}px, ${ny}px)`;
+      startMoving();
+
+      // timer
+      if(gameTimer) clearInterval(gameTimer);
+      gameTimer = setInterval(()=>{
+        timeLeft -= 1;
+        timerEl.textContent = formatTime(timeLeft);
+        if(timeLeft<=0){ endGame(); }
+      },1000);
+
+      // update message
+      message.textContent = 'Игра идёт! Лови Инсара — кликай по фото.';
+    }
+
+    function endGame(){
+      stopMoving();
+      clearInterval(gameTimer); gameTimer=null;
+      removeTarget();
+      message.textContent = `Раунд окончен! Набрано ${score} очков. Хочешь повтор?`;
+      if(score>best){ best=score; localStorage.setItem('catchInsarBest', best); bestEl.textContent = best+' очков'; }
+    }
+
+    function resetGame(){ stopMoving(); clearInterval(gameTimer); gameTimer=null; score=0; scoreEl.textContent='Очки: 0'; timerEl.textContent='00:00'; removeTarget(); message.textContent='Нажми «Старт», загрузите фото Инсара — и ловите его кликами! Имя: Инсар'; }
+
+    startBtn.addEventListener('click', ()=>{ startGame(); });
+    resetBtn.addEventListener('click', ()=>{ resetGame(); });
+
+    function formatTime(sec){ const m = Math.floor(sec/60); const s = sec%60; return (m?m+':':'00:') + String(s).padStart(2,'0'); }
+
+    // confetti (simple)
+    const confettiCtx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+    function resizeCanvas(){ confettiCanvas.width = playArea.clientWidth; confettiCanvas.height = playArea.clientHeight; }
+    window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+    function spawnConfettiAt(el){
+      const rect = el.getBoundingClientRect();
+      const areaRect = playArea.getBoundingClientRect();
+      const x = rect.left - areaRect.left + rect.width/2;
+      const y = rect.top - areaRect.top + rect.height/2;
+      for(let i=0;i<18;i++){
+        confettiPieces.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()*-6)-2,rot:Math.random()*360, size:6+Math.random()*8, life:60+Math.random()*40});
+      }
+      if(!confettiLoopRunning) runConfettiLoop();
+    }
+
+    let confettiLoopRunning=false;
+    function runConfettiLoop(){ confettiLoopRunning=true; function step(){ confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); for(let i=confettiPieces.length-1;i>=0;i--){ const p=confettiPieces[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.25; p.rot+=3; p.life--; confettiCtx.save(); confettiCtx.translate(p.x,p.y); confettiCtx.rotate(p.rot*Math.PI/180); confettiCtx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6); confettiCtx.restore(); if(p.life<=0 || p.y>confettiCanvas.height+50) confettiPieces.splice(i,1); }
+      if(confettiPieces.length>0) requestAnimationFrame(step); else { confettiLoopRunning=false; confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); } }
+      requestAnimationFrame(step);
+    }
+
+    // allow clicking the play area to create small distraction (optional)
+    playArea.addEventListener('click', e=>{
+      // small pop
+    });
+
+    // initialize
+    renderThumbs();
+
+    // small helpful hint: allow dropping images onto the page
+    ;(function setupDrop(){
+      const overlay = document.createElement('div');
+      overlay.style.position='absolute';overlay.style.inset='0';overlay.style.zIndex=2;overlay.style.pointerEvents='none';playArea.appendChild(overlay);
+      ['dragenter','dragover'].forEach(ev=>{
+        playArea.addEventListener(ev, e=>{ e.preventDefault(); overlay.style.pointerEvents='auto'; overlay.style.background='rgba(255,255,255,0.02)'; });
+      });
+      ['dragleave','drop'].forEach(ev=>{
+        playArea.addEventListener(ev, e=>{ e.preventDefault(); overlay.style.pointerEvents='none'; overlay.style.background='transparent'; });
+      });
+      playArea.addEventListener('drop', e=>{
+        const f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if(f && f.type.startsWith('image/')){
+          const reader = new FileReader(); reader.onload=e2=>{ images.push(e2.target.result); renderThumbs(); }; reader.readAsDataURL(f);
+        }
+      });
+    })();
+
+    // prevent accidental selection while playing
+    document.addEventListener('selectstart', e=>{ if(gameTimer) e.preventDefault(); });
+
+
+        // --- звук клика ---
+// Подключаем звук из файла в папке с index.html
+const clickSound = new Audio("click.mp3");
+
+function playClickSound() {
+  const snd = clickSound.cloneNode(); // можно быстро повторять звук
+  snd.volume = 0.5;
+  snd.play().catch(() => {});
+}
+
+// Добавляем вызов звука при клике на Инсара
+const oldRegisterHit = registerHit;
+registerHit = function() {
+  playClickSound();
+  oldRegisterHit();
+};
+
+
+  </script>
+</body>
+</html>
