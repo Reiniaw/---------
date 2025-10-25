@@ -4,53 +4,144 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Поймай Инсара — мини-игра</title>
-  <style>
-    :root{
-      --bg:#fffbf0;
-      --card:#ffffff;
-      --accent:#ff6b6b;
-      --accent2:#ffd93d;
-      --muted:#6b6b6b;
-      --shadow: 0 8px 30px rgba(18,18,18,0.08);
+<style>
+  :root{
+    --bg:#fffbf0;
+    --card:#ffffff;
+    --accent:#ff6b6b;
+    --accent2:#ffd93d;
+    --muted:#6b6b6b;
+    --shadow: 0 8px 30px rgba(18,18,18,0.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
+    background:linear-gradient(180deg,#fff7f0 0%, #fffefc 60%);
+    color:#222;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .wrap{
+    width:100%;
+    max-width:1100px;
+    background:var(--card);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:var(--shadow);
+  }
+  header{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .logo{
+    width:64px;height:64px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-weight:700;font-size:20px
+  }
+  h1{margin:0;font-size:20px}
+  p.lead{margin:4px 0 0;color:var(--muted)}
+
+  .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .card{
+    background:linear-gradient(180deg,#ffffff,#fffdf7);
+    padding:12px;border-radius:12px;box-shadow:var(--shadow);
+  }
+  button{
+    padding:10px 14px;border-radius:10px;border:0;
+    background:var(--accent);color:white;font-weight:700;cursor:pointer
+  }
+  button.secondary{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+  .game-area{margin-top:18px;display:flex;gap:18px}
+  .left{
+    flex:1;min-height:420px;
+    background:linear-gradient(180deg,#fffdf8,#fff7ee);
+    border-radius:12px;padding:12px;position:relative;overflow:hidden
+  }
+  .right{width:320px}
+  .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center}
+  .score,.timer{
+    background:rgba(255,255,255,0.7);padding:8px 10px;
+    border-radius:10px;font-weight:800
+  }
+  .timer{font-weight:700}
+
+  .target{
+    position:absolute;cursor:pointer;touch-action:none;border-radius:12px;
+    user-select:none;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;border:4px solid rgba(255,255,255,0.9);
+    box-shadow:0 8px 20px rgba(0,0,0,0.15)
+  }
+  .target img{display:block;width:100%;height:100%;object-fit:cover}
+
+  .right .card{margin-bottom:12px}
+  .uploads{display:flex;gap:8px;flex-wrap:wrap}
+  .thumb{
+    width:72px;height:72px;border-radius:10px;overflow:hidden;
+    border:2px dashed #eee;display:flex;align-items:center;
+    justify-content:center;background:#fff
+  }
+  input[type=file]{display:none}
+
+  .footer{margin-top:14px;font-size:13px;color:var(--muted)}
+  .big-msg{margin-top:10px;padding:12px;border-radius:10px;
+    background:linear-gradient(90deg,#ffefef,#fff9e6);font-weight:700}
+
+  /* ---------- адаптация ---------- */
+  @media(max-width:840px){
+    body{padding:12px}
+    .wrap{padding:16px}
+    .game-area{flex-direction:column}
+    .right{width:100%}
+    .left{min-height:360px}
+  }
+
+  @media(max-width:600px){
+    h1{font-size:18px}
+    .lead{font-size:14px}
+    .controls{
+      flex-direction:column;
+      gap:10px;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
-      background:linear-gradient(180deg,#fff7f0 0%, #fffefc 60%); color:#222;
-      display:flex;align-items:center;justify-content:center;padding:24px;
+    .card{
+      padding:10px;
     }
-    .wrap{width:100%;max-width:1100px;background:var(--card);border-radius:18px;padding:20px;box-shadow:var(--shadow);}
-    header{display:flex;gap:16px;align-items:center}
-    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
-    h1{margin:0;font-size:20px}
-    p.lead{margin:4px 0 0;color:var(--muted)}
+    button,select{
+      font-size:16px;
+      padding:12px;
+      width:100%;
+    }
+    .logo{
+      width:52px;height:52px;font-size:18px;
+    }
+    .right .card strong{font-size:16px}
+    .uploads{justify-content:center}
+    .thumb{width:64px;height:64px}
+    .score,.timer{
+      font-size:16px;
+      padding:6px 8px;
+    }
+    .footer{
+      font-size:12px;
+      text-align:center;
+      margin-top:20px;
+    }
+    .big-msg{
+      font-size:14px;
+      text-align:center;
+    }
+  }
 
-    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
-    .card{background:linear-gradient(180deg,#ffffff,#fffdf7);padding:12px;border-radius:12px;box-shadow:var(--shadow);}
-    button{padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:white;font-weight:700;cursor:pointer}
-    button.secondary{background:transparent;color:var(--accent);border:2px solid var(--accent)}
-    .game-area{margin-top:18px;display:flex;gap:18px}
-    .left{flex:1;min-height:420px;background:linear-gradient(180deg,#fffdf8,#fff7ee);border-radius:12px;padding:12px;position:relative;overflow:hidden}
-    .right{width:320px}
-    .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center}
-    .score{background:rgba(255,255,255,0.7);padding:8px 10px;border-radius:10px;font-weight:800}
-    .timer{background:rgba(255,255,255,0.7);padding:8px 10px;border-radius:10px;font-weight:700}
+  @media(max-width:400px){
+    body{padding:8px}
+    .wrap{padding:12px}
+    .left{min-height:300px}
+    .thumb{width:60px;height:60px}
+    button,select{font-size:15px}
+  }
+</style>
 
-    .target{position:absolute;cursor:pointer;touch-action:none;border-radius:12px;user-select:none;display:flex;align-items:center;justify-content:center;overflow:hidden;border:4px solid rgba(255,255,255,0.9);box-shadow:0 8px 20px rgba(0,0,0,0.15)}
-    .target img{display:block;width:100%;height:100%;object-fit:cover}
-
-    .right .card{margin-bottom:12px}
-    .uploads{display:flex;gap:8px;flex-wrap:wrap}
-    .thumb{width:72px;height:72px;border-radius:10px;overflow:hidden;border:2px dashed #eee;display:flex;align-items:center;justify-content:center;background:#fff}
-    input[type=file]{display:none}
-
-    .footer{margin-top:14px;font-size:13px;color:var(--muted)}
-
-    .big-msg{margin-top:10px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#ffefef,#fff9e6);font-weight:700}
-
-    @media(max-width:840px){.game-area{flex-direction:column}.right{width:100%}}
-  </style>
 </head>
 <body>
   <div class="wrap">
