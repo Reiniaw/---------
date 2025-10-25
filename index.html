@@ -19,25 +19,29 @@
 
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; }
-    body {
-      font-family: 'Inter', system-ui, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(circle at top, var(--bg1) 0%, var(--bg2) 100%);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+body {
+  font-family: 'Inter', system-ui, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(circle at top, var(--bg1) 0%, var(--bg2) 100%);
+  color: var(--text);
+  margin: 0;
+  padding: 24px;
+  display: block;
+  min-height: 100vh;
+  overflow-y: auto;
+}
 
-    .wrap {
-      width: 100%;
-      max-width: 1080px;
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 22px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+
+.wrap {
+  width: 100%;
+  max-width: 1080px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin: 0 auto;
+}
+
 
     header {
       display: flex;
