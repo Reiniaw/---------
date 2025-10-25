@@ -247,6 +247,43 @@
       button, select { font-size: 15px; padding: 12px; }
       .logo { width: 52px; height: 52px; font-size: 18px; }
     }
+
+    /* === Адаптация меню под телефон === */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls .card {
+    width: 100%;
+  }
+
+  #uploadBtn,
+  #startBtn,
+  #resetBtn,
+  select {
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  header .logo {
+    font-size: 2rem;
+  }
+}
+
   </style>
 </head>
 
