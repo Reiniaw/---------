@@ -509,7 +509,7 @@ header, .controls {
         const maxY = areaRect.height - sizePx - padding;
 const offset = 100;
 let nx = offset + Math.random() * (maxX - offset * 2);
-let ny = offset + Math.random() * (maxY - offset * 2) + playArea.scrollTop;
+let ny = offset + Math.random() * (maxY - offset * 2);
 
         // if mouse is near, try to move away from it
         if(lastMouse){
@@ -561,7 +561,7 @@ let ny = offset + Math.random() * (maxY - offset * 2) + playArea.scrollTop;
       const maxY = areaRect.height - sizePx - padding;
 const offset = 100;
 const nx = offset + Math.random() * (maxX - offset * 2);
-const ny = offset + Math.random() * (maxY - offset * 2) + playArea.scrollTop;
+const ny = offset + Math.random() * (maxY - offset * 2);
 
 
       target.style.transition='transform 160ms ease-out';
@@ -579,7 +579,8 @@ const ny = offset + Math.random() * (maxY - offset * 2) + playArea.scrollTop;
       const areaRect = playArea.getBoundingClientRect();
 const offset = 100; // отступ от краёв
 const nx = offset + Math.random() * (areaRect.width - sizePx - offset * 2 - 8);
-const ny = offset + Math.random() * (areaRect.height - sizePx - offset * 2 - 8) + playArea.scrollTop;
+const ny = offset + Math.random() * (areaRect.height - sizePx - offset * 2 - 8);
+
 
 
       target.style.transform = `translate(${nx}px, ${ny}px)`;
